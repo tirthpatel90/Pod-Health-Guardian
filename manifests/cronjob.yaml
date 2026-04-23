@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: health-guardian
+spec:
+  schedule: "*/5 * * * *" 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: health-guardian-sa
+          imagePullSecrets:
+          - name: ecr-secret
+          containers:
+          - name: guard
+            image: 787418837844.dkr.ecr.ap-south-1.amazonaws.com/health-guardian:latest
+            env:
+            - name: SNS_TOPIC_ARN
+              value: "arn:aws:sns:ap-south-1:787418837844:pod-alerts"
+            - name: S3_BUCKET
+              value: "k8s-audit-logs-170"
+            - name: AWS_REGION
+              value: "us-east-1"
+          restartPolicy: OnFailure
